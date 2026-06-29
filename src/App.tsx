@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import type { CSSProperties } from "react";
 import {
   AlertTriangle,
   ArrowDownUp,
@@ -26,7 +27,7 @@ import trendLineIcon from "./assets/icons/trend-line.png";
 import trophyIcon from "./assets/icons/trophy.png";
 
 const modeLabels: Record<LeaderboardMode, string> = {
-  skills: "Skills",
+  skills: "Services",
   agents: "Agents",
   tasks: "Tasks",
   bids: "Bids",
@@ -69,8 +70,10 @@ function useLeaderboard(rpcUrl: string) {
 function rankBuckets(rows: LeaderboardRow[]) {
   const max = Math.max(...rows.map((row) => row.score), 1);
   return rows.slice(0, 10).map((row) => ({
+    id: row.id,
     label: `#${row.rank}`,
     pct: Math.max(8, (row.score / max) * 100),
+    score: row.score,
   }));
 }
 
@@ -264,6 +267,10 @@ export default function App() {
 
   const buckets = rankBuckets(rows);
   const stats = snapshot?.stats;
+  const chartKey = `${mode}-${loading ? "loading" : "ready"}-${buckets
+    .map((bucket) => `${bucket.id}:${bucket.score}`)
+    .join("|")}`;
+  const emptyChartText = loading && !snapshot ? "Loading decoded leaderboard rows" : "Awaiting decoded leaderboard rows";
 
   const applyCustomRpc = () => {
     const value = customRpc.trim();
@@ -297,7 +304,7 @@ export default function App() {
 
       <section className="status-strip">
         <Stat icon={agentsIcon} label="Agents" value={formatNumber(stats?.agents ?? 0)} />
-        <Stat icon={skillKnightIcon} label="Skills" value={formatNumber(stats?.skills ?? 0)} />
+        <Stat icon={skillKnightIcon} label="Services" value={formatNumber((stats?.skills ?? 0) + (stats?.listings ?? 0))} />
         <Stat icon={taskListIcon} label="Tasks" value={formatNumber(stats?.tasks ?? 0)} />
         <Stat icon={growthBarsIcon} label="Bids" value={formatNumber(stats?.bids ?? 0)} />
         <Stat icon={briefcaseIcon} label="Listings" value={formatNumber(stats?.listings ?? 0)} />
@@ -343,11 +350,16 @@ export default function App() {
               <strong>Top score distribution</strong>
             </div>
             {buckets.length ? (
-              <div className="bars">
+              <div key={chartKey} className="bars">
                 {buckets.map((bucket, index) => (
                   <span
-                    key={bucket.label}
-                    style={{ height: `${bucket.pct}%`, animationDelay: `${index * 70}ms` }}
+                    key={`${bucket.id}-${bucket.score}`}
+                    style={
+                      {
+                        "--bar-height": `${bucket.pct}%`,
+                        animationDelay: `${index * 70}ms`,
+                      } as CSSProperties
+                    }
                     title={`${bucket.label}: ${bucket.pct.toFixed(1)}%`}
                   >
                     <em>{bucket.label}</em>
@@ -355,13 +367,21 @@ export default function App() {
                 ))}
               </div>
             ) : (
-              <div className="chart-empty">
+              <div key={chartKey} className="chart-empty">
                 <div className="ghost-bars" aria-hidden="true">
                   {[34, 58, 42, 74, 50, 66, 38].map((height, index) => (
-                    <span key={height} style={{ height: `${height}%`, animationDelay: `${index * 65}ms` }} />
+                    <span
+                      key={height}
+                      style={
+                        {
+                          "--bar-height": `${height}%`,
+                          animationDelay: `${index * 65}ms`,
+                        } as CSSProperties
+                      }
+                    />
                   ))}
                 </div>
-                <span>Awaiting decoded leaderboard rows</span>
+                <span>{emptyChartText}</span>
               </div>
             )}
           </div>

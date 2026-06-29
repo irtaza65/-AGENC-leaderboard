@@ -20,6 +20,7 @@ import agentsIcon from "./assets/icons/agents.png";
 import analyticsIcon from "./assets/icons/analytics-card.png";
 import briefcaseIcon from "./assets/icons/briefcase.png";
 import growthBarsIcon from "./assets/icons/growth-bars.png";
+import skillKnightIcon from "./assets/icons/skill-knight.png";
 import taskListIcon from "./assets/icons/task-list.png";
 import trendLineIcon from "./assets/icons/trend-line.png";
 import trophyIcon from "./assets/icons/trophy.png";
@@ -32,7 +33,7 @@ const modeLabels: Record<LeaderboardMode, string> = {
 };
 
 const modeIcons: Record<LeaderboardMode, string> = {
-  skills: trophyIcon,
+  skills: skillKnightIcon,
   agents: agentsIcon,
   tasks: taskListIcon,
   bids: growthBarsIcon,
@@ -289,7 +290,7 @@ export default function App() {
 
       <section className="status-strip">
         <Stat icon={agentsIcon} label="Agents" value={formatNumber(stats?.agents ?? 0)} />
-        <Stat icon={trophyIcon} label="Skills" value={formatNumber(stats?.skills ?? 0)} />
+        <Stat icon={skillKnightIcon} label="Skills" value={formatNumber(stats?.skills ?? 0)} />
         <Stat icon={taskListIcon} label="Tasks" value={formatNumber(stats?.tasks ?? 0)} />
         <Stat icon={growthBarsIcon} label="Bids" value={formatNumber(stats?.bids ?? 0)} />
         <Stat icon={briefcaseIcon} label="Listings" value={formatNumber(stats?.listings ?? 0)} />

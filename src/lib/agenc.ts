@@ -30,10 +30,9 @@ const SDK_FEE_TIERS = [
 ] as const;
 
 export const RPC_OPTIONS = [
-  "/api/solana-rpc",
   "https://api.mainnet-beta.solana.com",
+  "/api/solana-rpc",
   "https://solana-rpc.publicnode.com",
-  "https://rpc.ankr.com/solana",
 ];
 
 export type LeaderboardMode = "skills" | "agents" | "tasks" | "bids";
@@ -231,14 +230,23 @@ export async function fetchSnapshot(rpcUrl: string): Promise<Snapshot> {
   const connection = new Connection(resolvedRpcUrl, "confirmed");
   const program = makeProgram(connection);
   const warnings: string[] = [];
+  const rpcCandidates = Array.from(
+    new Set([resolvedRpcUrl, ...RPC_OPTIONS.map((url) => new URL(url, window.location.origin).toString())]),
+  );
 
   const safeAll = async (accountName: string, idlName: string) => {
-    try {
-      return await withTimeout(rawAccounts(program, resolvedRpcUrl, accountName, idlName), accountName, 12_000);
-    } catch (error) {
-      warnings.push(`${accountName}: ${error instanceof Error ? error.message : String(error)}`);
-      return [];
+    const failures: string[] = [];
+    for (const candidate of rpcCandidates) {
+      const label = `${accountName} via ${candidate.replace(window.location.origin, "same-origin")}`;
+      try {
+        return await withTimeout(rawAccounts(program, candidate, accountName, idlName), label, 8_000);
+      } catch (error) {
+        failures.push(error instanceof Error ? error.message : String(error));
+      }
     }
+
+    warnings.push(`${accountName}: ${failures[0] ?? "all RPC candidates failed"}`);
+    return [];
   };
 
   const [agents, tasks, listings, skills, purchases, bidBooks, bids, bidderMarkets] = await Promise.all([

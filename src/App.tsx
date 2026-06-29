@@ -41,20 +41,47 @@ const modeIcons: Record<LeaderboardMode, string> = {
 };
 
 type SortKey = "score" | "name" | "activity" | "value" | "status";
+const BOOTSTRAP_SNAPSHOT_URL = "/bootstrap-snapshot.json";
+
+function hasDecodedRows(snapshot: Snapshot) {
+  return Object.values(snapshot.rows).some((rows) => rows.length > 0);
+}
 
 function useLeaderboard(rpcUrl: string) {
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const loadBootstrapSnapshot = async () => {
+    const response = await fetch(BOOTSTRAP_SNAPSHOT_URL, { cache: "no-store" });
+    if (!response.ok) throw new Error(`Bootstrap snapshot unavailable: ${response.status}`);
+    return (await response.json()) as Snapshot;
+  };
+
   const refresh = async () => {
     setLoading(true);
     setError(null);
+    let hasFallbackSnapshot = Boolean(snapshot);
+
+    if (!snapshot) {
+      loadBootstrapSnapshot()
+        .then((bootstrap) => {
+          hasFallbackSnapshot = true;
+          setSnapshot((current) => current ?? bootstrap);
+        })
+        .catch(() => {
+          // Live RPC remains the source of truth; the bootstrap is only a resilience layer.
+        });
+    }
+
     try {
       const next = await fetchSnapshot(rpcUrl);
-      setSnapshot(next);
+      setSnapshot((current) => (hasDecodedRows(next) || !current ? next : current));
+      if (!hasDecodedRows(next) && !hasFallbackSnapshot) {
+        setError("Live RPC refresh is temporarily unavailable; showing the bundled SDK/RPC snapshot.");
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(hasFallbackSnapshot ? null : err instanceof Error ? err.message : String(err));
     } finally {
       setLoading(false);
     }
@@ -243,7 +270,7 @@ function LeaderboardTable({
 export default function App() {
   const [rpcUrl, setRpcUrl] = useState(RPC_OPTIONS[0]);
   const [customRpc, setCustomRpc] = useState("");
-  const [mode, setMode] = useState<LeaderboardMode>("skills");
+  const [mode, setMode] = useState<LeaderboardMode>("agents");
   const [query, setQuery] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("score");
   const [selected, setSelected] = useState<LeaderboardRow | null>(null);

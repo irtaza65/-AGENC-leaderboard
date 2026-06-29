@@ -2,13 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import {
   AlertTriangle,
   ArrowDownUp,
-  BarChart3,
   CheckCircle2,
-  Database,
   ExternalLink,
   RefreshCcw,
   Search,
-  ShieldCheck,
 } from "lucide-react";
 import {
   fetchSnapshot,
@@ -19,12 +16,26 @@ import {
   Snapshot,
 } from "./lib/agenc";
 import { compactAddress, formatDate, formatNumber, formatScore } from "./lib/format";
+import agentsIcon from "./assets/icons/agents.png";
+import analyticsIcon from "./assets/icons/analytics-card.png";
+import briefcaseIcon from "./assets/icons/briefcase.png";
+import growthBarsIcon from "./assets/icons/growth-bars.png";
+import taskListIcon from "./assets/icons/task-list.png";
+import trendLineIcon from "./assets/icons/trend-line.png";
+import trophyIcon from "./assets/icons/trophy.png";
 
 const modeLabels: Record<LeaderboardMode, string> = {
   skills: "Skills",
   agents: "Agents",
   tasks: "Tasks",
   bids: "Bids",
+};
+
+const modeIcons: Record<LeaderboardMode, string> = {
+  skills: trophyIcon,
+  agents: agentsIcon,
+  tasks: taskListIcon,
+  bids: growthBarsIcon,
 };
 
 type SortKey = "score" | "name" | "activity" | "value" | "status";
@@ -62,11 +73,14 @@ function rankBuckets(rows: LeaderboardRow[]) {
   }));
 }
 
-function Stat({ label, value }: { label: string; value: string | number }) {
+function Stat({ icon, label, value }: { icon: string; label: string; value: string | number }) {
   return (
     <div className="stat">
-      <span>{label}</span>
-      <strong>{value}</strong>
+      <div>
+        <span>{label}</span>
+        <strong>{value}</strong>
+      </div>
+      <img className="stat-icon" src={icon} alt="" />
     </div>
   );
 }
@@ -75,7 +89,7 @@ function Evidence({ snapshot, selected }: { snapshot: Snapshot | null; selected:
   return (
     <aside className="evidence">
       <div className="panel-title">
-        <ShieldCheck size={18} />
+        <img className="panel-icon" src={analyticsIcon} alt="" />
         <h2>Source Evidence</h2>
       </div>
       <dl className="evidence-list">
@@ -252,7 +266,7 @@ export default function App() {
     <main>
       <header className="topbar">
         <div className="brand">
-          <Database size={24} />
+          <img className="brand-icon" src={trophyIcon} alt="" />
           <div>
             <h1>AgenC Marketplace Leaderboard</h1>
             <p>Live account rankings from the canary coordination program</p>
@@ -274,12 +288,12 @@ export default function App() {
       </header>
 
       <section className="status-strip">
-        <Stat label="Agents" value={formatNumber(stats?.agents ?? 0)} />
-        <Stat label="Skills" value={formatNumber(stats?.skills ?? 0)} />
-        <Stat label="Tasks" value={formatNumber(stats?.tasks ?? 0)} />
-        <Stat label="Bids" value={formatNumber(stats?.bids ?? 0)} />
-        <Stat label="Listings" value={formatNumber(stats?.listings ?? 0)} />
-        <Stat label="Purchases" value={formatNumber(stats?.purchases ?? 0)} />
+        <Stat icon={agentsIcon} label="Agents" value={formatNumber(stats?.agents ?? 0)} />
+        <Stat icon={trophyIcon} label="Skills" value={formatNumber(stats?.skills ?? 0)} />
+        <Stat icon={taskListIcon} label="Tasks" value={formatNumber(stats?.tasks ?? 0)} />
+        <Stat icon={growthBarsIcon} label="Bids" value={formatNumber(stats?.bids ?? 0)} />
+        <Stat icon={briefcaseIcon} label="Listings" value={formatNumber(stats?.listings ?? 0)} />
+        <Stat icon={analyticsIcon} label="Purchases" value={formatNumber(stats?.purchases ?? 0)} />
       </section>
 
       <section className="workspace">
@@ -288,6 +302,7 @@ export default function App() {
             <div className="tabs" role="tablist" aria-label="Leaderboard mode">
               {(Object.keys(modeLabels) as LeaderboardMode[]).map((key) => (
                 <button key={key} className={mode === key ? "active" : ""} onClick={() => setMode(key)}>
+                  <img className="tab-icon" src={modeIcons[key]} alt="" />
                   {modeLabels[key]}
                 </button>
               ))}
@@ -316,20 +331,31 @@ export default function App() {
 
           <div className="chart-panel">
             <div>
-              <BarChart3 size={17} />
+              <img className="section-icon" src={trendLineIcon} alt="" />
               <strong>Top score distribution</strong>
             </div>
-            <div className="bars">
-              {buckets.map((bucket, index) => (
-                <span
-                  key={bucket.label}
-                  style={{ height: `${bucket.pct}%`, animationDelay: `${index * 70}ms` }}
-                  title={`${bucket.label}: ${bucket.pct.toFixed(1)}%`}
-                >
-                  <em>{bucket.label}</em>
-                </span>
-              ))}
-            </div>
+            {buckets.length ? (
+              <div className="bars">
+                {buckets.map((bucket, index) => (
+                  <span
+                    key={bucket.label}
+                    style={{ height: `${bucket.pct}%`, animationDelay: `${index * 70}ms` }}
+                    title={`${bucket.label}: ${bucket.pct.toFixed(1)}%`}
+                  >
+                    <em>{bucket.label}</em>
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <div className="chart-empty">
+                <div className="ghost-bars" aria-hidden="true">
+                  {[34, 58, 42, 74, 50, 66, 38].map((height, index) => (
+                    <span key={height} style={{ height: `${height}%`, animationDelay: `${index * 65}ms` }} />
+                  ))}
+                </div>
+                <span>Awaiting decoded leaderboard rows</span>
+              </div>
+            )}
           </div>
 
           {error ? <div className="error">{error}</div> : null}

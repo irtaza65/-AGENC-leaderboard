@@ -61,8 +61,16 @@ main {
   gap: 13px;
 }
 
-.brand svg {
-  color: #087675;
+.brand-icon {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  object-fit: contain;
+  padding: 6px;
+  border: 1px solid #d2dfde;
+  border-radius: 8px;
+  background: #ffffff;
+  filter: drop-shadow(0 10px 18px rgba(8, 118, 117, 0.12));
 }
 
 h1,
@@ -160,6 +168,10 @@ h1 {
 }
 
 .stat {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   background: rgba(255, 255, 255, 0.94);
   padding: 16px;
   transition:
@@ -185,6 +197,24 @@ h1 {
   margin-top: 7px;
   font-size: 22px;
   font-weight: 560;
+}
+
+.stat-icon {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  object-fit: contain;
+  opacity: 0.88;
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease,
+    filter 160ms ease;
+}
+
+.stat:hover .stat-icon {
+  opacity: 1;
+  filter: drop-shadow(0 8px 14px rgba(8, 118, 117, 0.12));
+  transform: translateY(-1px) scale(1.04);
 }
 
 .workspace {
@@ -228,6 +258,27 @@ h1 {
   color: #ffffff;
   background: #087675;
   box-shadow: 0 6px 14px rgba(8, 118, 117, 0.18);
+}
+
+.tab-icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  opacity: 0.72;
+  transition:
+    opacity 150ms ease,
+    transform 150ms ease,
+    filter 150ms ease;
+}
+
+.tabs button:hover .tab-icon {
+  opacity: 0.95;
+  transform: translateY(-1px);
+}
+
+.tabs button.active .tab-icon {
+  opacity: 1;
+  filter: brightness(0) invert(1);
 }
 
 .search {
@@ -293,8 +344,16 @@ h1 {
   font-weight: 500;
 }
 
-.chart-panel svg {
-  color: #c27b22;
+.section-icon,
+.panel-icon {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  object-fit: contain;
+}
+
+.section-icon {
+  filter: drop-shadow(0 7px 11px rgba(194, 123, 34, 0.12));
 }
 
 .bars {
@@ -330,6 +389,31 @@ h1 {
   color: #637077;
   font-style: normal;
   font-size: 11px;
+}
+
+.chart-empty {
+  display: grid;
+  grid-template-columns: minmax(130px, 260px) 1fr;
+  align-items: center;
+  gap: 18px;
+  color: #718087;
+  font-size: 13px;
+}
+
+.ghost-bars {
+  height: 72px;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.ghost-bars span {
+  flex: 1;
+  min-width: 18px;
+  border-radius: 5px 5px 2px 2px;
+  background: linear-gradient(180deg, rgba(8, 118, 117, 0.3), rgba(55, 170, 164, 0.12));
+  transform-origin: bottom;
+  animation: barRise 620ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
 .table-wrap {
@@ -508,6 +592,10 @@ tbody tr:hover .status {
 
 .panel-title svg {
   color: #087675;
+}
+
+.panel-icon {
+  filter: drop-shadow(0 7px 11px rgba(8, 118, 117, 0.12));
 }
 
 .panel-title h2 {
@@ -731,6 +819,10 @@ footer {
   }
 
   .chart-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-empty {
     grid-template-columns: 1fr;
   }
 

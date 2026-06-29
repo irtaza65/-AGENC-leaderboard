@@ -148,12 +148,14 @@ function Evidence({ snapshot, selected }: { snapshot: Snapshot | null; selected:
 
 function LeaderboardTable({
   rows,
+  rowIcon,
   sortKey,
   onSort,
   selectedId,
   onSelect,
 }: {
   rows: LeaderboardRow[];
+  rowIcon: string;
   sortKey: SortKey;
   onSort: (key: SortKey) => void;
   selectedId: string | null;
@@ -201,8 +203,13 @@ function LeaderboardTable({
                 <span className="rank">#{row.rank}</span>
               </td>
               <td>
-                <strong>{row.name}</strong>
-                <span>{compactAddress(row.id)}</span>
+                <div className="name-cell">
+                  <img className="row-icon" src={rowIcon} alt="" />
+                  <div>
+                    <strong>{row.name}</strong>
+                    <span>{compactAddress(row.id)}</span>
+                  </div>
+                </div>
               </td>
               <td>
                 <strong>{row.primary}</strong>
@@ -363,6 +370,7 @@ export default function App() {
           {loading && !snapshot ? <div className="loading">Fetching decoded protocol accounts...</div> : null}
           <LeaderboardTable
             rows={rows}
+            rowIcon={modeIcons[mode]}
             sortKey={sortKey}
             onSort={setSortKey}
             selectedId={selected?.id ?? null}

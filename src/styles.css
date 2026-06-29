@@ -488,6 +488,34 @@ td span {
   font-weight: 400;
 }
 
+.name-cell {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.name-cell strong,
+.name-cell span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.row-icon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  padding: 5px;
+  border-radius: 7px;
+  background: #edf7f6;
+  opacity: 0.9;
+  transition:
+    background 150ms ease,
+    opacity 150ms ease,
+    transform 150ms ease;
+}
+
 tbody tr {
   transition:
     background 150ms ease,
@@ -522,9 +550,14 @@ tbody tr:hover {
 }
 
 tbody tr:hover .rank,
-tbody tr:hover .score {
+tbody tr:hover .score,
+tbody tr:hover .row-icon {
   background: #d9eeec;
   transform: scale(1.03);
+}
+
+tbody tr:hover .row-icon {
+  opacity: 1;
 }
 
 td .score {
